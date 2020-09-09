@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.hzero.order.infra.mapper.HodrSoLineMapper">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="org.hzero.order.domain.entity.HodrSoLine">
+        <result column="so_line_id" property="soLineId" jdbcType="DECIMAL"/>
+        <result column="so_header_id" property="soHeaderId" jdbcType="DECIMAL"/>
+        <result column="line_number" property="lineNumber" jdbcType="DECIMAL"/>
+        <result column="item_id" property="itemId" jdbcType="DECIMAL"/>
+        <result column="order_quantity" property="orderQuantity" jdbcType="DECIMAL"/>
+        <result column="order_quantity_uom" property="orderQuantityUom" jdbcType="VARCHAR"/>
+        <result column="unit_selling_price" property="unitSellingPrice" jdbcType="DECIMAL"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="addition1" property="addition1" jdbcType="VARCHAR"/>
+        <result column="addition2" property="addition2" jdbcType="VARCHAR"/>
+        <result column="addition3" property="addition3" jdbcType="VARCHAR"/>
+        <result column="addition4" property="addition4" jdbcType="VARCHAR"/>
+        <result column="addition5" property="addition5" jdbcType="VARCHAR"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="DATE"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="DATE"/>
+    </resultMap>
+
+    <select id="selectByConditionLike" resultType="org.hzero.order.domain.entity.HodrSoLine">
+        select
+        hsh.so_header_id,
+        hsh.order_number,
+        hsh.order_date,
+        hsh.order_status,
+        hc.company_id,
+        hc.company_name,
+        hcr.customer_id,
+        hcr.customer_name,
+        hsh.object_version_number,
+        round(ifnull(sum(hol.order_quantity * hol.unit_selling_price),0),2) orderAmount
+        from
+        hodr_so_header hsh
+        left join hodr_company hc on hsh.company_id = hc.company_id
+        left join hodr_customer hcr on hcr.customer_id = hsh.customer_id
+        left join hodr_so_line hol on hsh.so_header_id = hol.so_header_id
+        left join hodr_item ht on hol.item_id = ht.item_id
+        where 1=1
+        <if test="companyName != null and companyName != ''">
+            <bind name="companyNameLike" value="'%' + companyName +'%'"/>
+            and hc.company_name like #{companyNameLike}
+        </if>
+        <if test="customerName != null and customerName != ''">
+            <bind name="customerNameLike" value="'%' + customerName +'%'"/>
+            and hcr.customer_name like #{customerNameLike}
+        </if>
+        <if test="orderNumber != null and orderNumber != ''">
+            <bind name="orderNumberLike" value="'%' + orderNumber +'%'"/>
+            and hsh.order_number like #{orderNumberLike}
+        </if>
+        <if test="itemDescription != null and itemDescription != ''">
+            <bind name="itemDescriptionLike" value="'%' + itemDescription +'%'"/>
+            and ht.item_description like #{itemDescriptionLike}
+        </if>
+        <if test="orderStatus != null and orderStatus != ''">
+            and hsh.order_status = #{orderStatus}
+        </if>
+        group by hsh.so_header_id desc
+    </select>
+
+    <select id="selectHeaderBySoHeaderId" resultType="org.hzero.order.domain.entity.HodrSoLine">
+        select
+        hsh.so_header_id,
+        hsh.object_version_number,
+        hsh.order_number,
+        hsh.order_date,
+        hsh.order_status,
+        hc.company_id,
+        hc.company_name,
+	    t2.orderAmount,
+	    hcr.customer_id,
+        hcr.customer_name
+        from
+        hodr_so_header hsh
+        left join hodr_company hc on hsh.company_id = hc.company_id
+        left join hodr_customer hcr on hcr.customer_id = hsh.customer_id
+		left join
+		((select
+		    round(ifnull(sum(t.lineAmount),0),2) orderAmount,
+			t.so_header_id
+		    from
+            ((select hol1.order_quantity * hol1.unit_selling_price lineAmount,
+				hsh1.so_header_id
+				from hodr_so_header hsh1
+				left join hodr_so_line hol1 on hol1.so_header_id = hsh1.so_header_id) as t)
+				group by t.so_header_id
+				) t2)
+		on hsh.so_header_id = t2.so_header_id
+        where hsh.so_header_id = #{soHeaderId}
+    </select>
+
+
+    <select id="selectLineBySoHeaderId" resultType="org.hzero.order.domain.entity.HodrSoLine">
+        select
+        hol.so_header_id,
+		hol.so_line_id,
+		hol.order_quantity_uom,
+		hol.line_number,
+		hol.object_version_number,
+		hi.item_id,
+		hi.item_code,
+		hi.item_description,
+		hol.order_quantity,
+		hol.unit_selling_price,
+		round((hol.order_quantity * hol.unit_selling_price),2) lineAmount,
+		hol.description,
+		hol.addition1,
+		hol.addition2,
+		hol.addition3,
+		hol.addition4,
+		hol.addition5
+		from
+        hodr_so_line hol
+        left join hodr_item hi on hol.item_id = hi.item_id
+		where  hol.so_header_id = #{soHeaderId}
+    </select>
+
+    <select id="lineNum" resultType="java.lang.Long">
+        select
+        IFNULL(max(hsl.line_number),0) lineNumber
+        from
+        hodr_so_line hsl
+        where
+        hsl.so_header_id = #{soHeaderId}
+
+    </select>
+
+
+    <select id="selectOrderHeader" resultType="org.hzero.order.api.controller.dto.OrderExportExcelDTO">
+        select
+        hsh.so_header_id,
+        hsh.order_number,
+        hsh.order_date,
+        hsh.order_status,
+        hc.company_name,
+        hcr.customer_name,
+        round(ifnull(sum(hol.order_quantity * hol.unit_selling_price),0),2) orderAmount
+        from
+        hodr_so_header hsh
+        left join hodr_company hc on hsh.company_id = hc.company_id
+        left join hodr_customer hcr on hcr.customer_id = hsh.customer_id
+        left join hodr_so_line hol on hsh.so_header_id = hol.so_header_id
+        left join hodr_item ht on hol.item_id = ht.item_id
+        where 1=1
+        <if test="companyName != null and companyName != ''">
+            <bind name="companyNameLike" value="'%' + companyName +'%'"/>
+            and hc.company_name like #{companyNameLike}
+        </if>
+        <if test="customerName != null and customerName != ''">
+            <bind name="customerNameLike" value="'%' + customerName +'%'"/>
+            and hcr.customer_name like #{customerNameLike}
+        </if>
+        <if test="orderNumber != null and orderNumber != ''">
+            <bind name="orderNumberLike" value="'%' + orderNumber +'%'"/>
+            and hsh.order_number like #{orderNumberLike}
+        </if>
+        <if test="itemDescription != null and itemDescription != ''">
+            <bind name="itemDescriptionLike" value="'%' + itemDescription +'%'"/>
+            and ht.item_description like #{itemDescriptionLike}
+        </if>
+        <if test="orderStatus != null and orderStatus != ''">
+            and hsh.order_status = #{orderStatus}
+        </if>
+        group by hsh.so_header_id
+    </select>
+
+    <select id="selectOrderLine" resultType="org.hzero.order.api.controller.dto.OrderLineExportDTO">
+        select
+        hol.line_number,
+        ht.item_code,
+        ht.item_description,
+        hol.order_quantity_uom,
+        hol.order_quantity,
+        hol.unit_selling_price,
+        round(ifnull((hol.order_quantity * hol.unit_selling_price),0)) lineAmount,
+        hol.description
+        from
+        hodr_so_line hol
+        left join hodr_so_header hsh on hsh.so_header_id = hol.so_header_id
+        left join hodr_item ht on hol.item_id = ht.item_id
+        where hol.so_header_id = #{soHeaderId}
+    </select>
+
+    <select id="selectLineId" resultType="org.hzero.order.domain.entity.HodrSoLine">
+        select
+        hol.so_line_id,
+        hol.object_version_number
+        from
+        hodr_so_line hol
+        where hol.line_number = #{lineNumber}
+        and hol.so_header_id = #{soHeaderId}
+        limit 1
+    </select>
+
+
+</mapper>

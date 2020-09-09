@@ -1,0 +1,21 @@
+
+Z
+java:S1128"8Remove this unused import 'java.util.stream.Collectors'.(Óóº´úÿÿÿÿ8€áŸèÆ.
+T	java:S106^"9Replace this use of System.out or System.err by a logger.(‡ùÀa8€áŸèÆ.
+U	java:S106s"9Replace this use of System.out or System.err by a logger.(…×é½8€áŸèÆ.
+`
+java:S1128"CRemove this unused import 'org.springframework.stereotype.Service'.(¼º¡Ú8€áŸèÆ.
+Z	java:S106_"9Replace this use of System.out or System.err by a logger.(Ô°æ—úÿÿÿÿ8€áŸèÆ.
+^
+java:S1117P"ARename "hodrSoLineDTO" which hides the field declared at line 48.(Úå’ñ8€áŸèÆ.
+X	java:S125g"<This block of commented-out lines of code should be removed.(†ªĞ8€áŸèÆ.
+Z	java:S106]"9Replace this use of System.out or System.err by a logger.(ÔÃ’ƒûÿÿÿÿ8€áŸèÆ.
+U	java:S106e"9Replace this use of System.out or System.err by a logger.(Ÿ¢Úş8€áŸèÆ.
+X	java:S125M"<This block of commented-out lines of code should be removed.(í¯Û¿8€áŸèÆ.
+k
+java:S1128"IRemove this unused import 'springfox.documentation.spring.web.json.Json'.(×Š„‹øÿÿÿÿ8€áŸèÆ.
+U	java:S106Y"9Replace this use of System.out or System.err by a logger.(ïÕ¹¹8€áŸèÆ.
+U	java:S106t"9Replace this use of System.out or System.err by a logger.(Ø†ìÇ8€áŸèÆ.
+Z	java:S106`"9Replace this use of System.out or System.err by a logger.(ô‰×Ùùÿÿÿÿ8€áŸèÆ.
+u
+java:S1128"SRemove this unused import 'org.springframework.beans.factory.annotation.Autowired'.(¡¸Îùÿÿÿÿ8€áŸèÆ.

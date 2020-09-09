@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: hzero-order-28255
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://172.23.16.111:23306/hzero_order?useUnicode=true&characterEncoding=utf-8&useSSL=false}
+    username: ${SPRING_DATASOURCE_USERNAME:hdsp}
+    password: ${SPRING_DATASOURCE_PASSWORD:hdsp}
+
+  redis:
+    host: ${SPRING_REDIS_HOST:172.23.16.111}
+    port: ${SPRING_REDIS_PORT:26379}
+    database: ${SPRING_REDIS_DATABASE:1}
+    password: ${SPRING_REDIS_PASSWORD:redis123456}
+
+# MyBatis Mapper 扫描
+mybatis:
+  mapperLocations: classpath*:/mapper/*.xml
+  configuration:
+    mapUnderscoreToCamelCase: true
+
+hzero:
+  service:
+    current:
+      name: order
+      path: /order/**
+      service-name: hzero-order-28255
+
+eureka:
+  instance:
+    # 以IP注册到注册中心
+    preferIpAddress: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:true}
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 10
+    # 服务的一些元数据信息
+    metadata-map:
+      VERSION: 0.11.0
+  client:
+    serviceUrl:
+      # 注册中心地址，多个用逗号隔开
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://172.23.16.111:8000/eureka}
+    registryFetchIntervalSeconds: 10
+    disable-delta: true
+
+# 日志配置
+logging:
+  level:
+    org.hzero: ${LOG_LEVEL:debug}
+    org.apache.ibatis: ${LOG_LEVEL:debug}
+    io.choerodon: ${LOG_LEVEL:debug}
